@@ -42,29 +42,28 @@ function ParseAndDisplayJson(data) {
         }
     }
 
-    return nextPageIndex;
+    // go until end of reddit history
+    if (nextPageIndex != null) {
+        getRedditJson(`${frontPageUrl}&after=${nextPageIndex}`)
+            .then(function (data2) {
+                ParseAndDisplayJson(data2);
+            }, function (error) {
+                console.error(error);
+            });
+    }
 }
 
 function hasNovelName(title) {
 
 }
 
-getRedditJson(frontPageUrl)
-    .then(function (data) {
-        var count = 0;
-        var nextPageIndex = ParseAndDisplayJson(data);
+function startApp() {
+    getRedditJson(frontPageUrl)
+        .then(function (data) {
+            ParseAndDisplayJson(data);
+        }, function (error) {
+            console.error(error);
+        });
+}
 
-        // while (nextPageIndex != null || count < 5) {
-        //     (function (nextPage) {
-        //         getRedditJson(`${frontPageUrl}&after=${nextPage}`)
-        //             .then(function (data2) {
-        //                 count++;
-        //                 nextPageIndex = ParseAndDisplayJson(data2);
-        //             }, function (error) {
-        //                 console.error(error);
-        //             });
-        //     })(nextPageIndex);
-        // }
-    }, function (error) {
-        console.error(error);
-    });
+startApp();
