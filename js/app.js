@@ -17,25 +17,54 @@ function getRedditJson(url) {
     });
 }
 
+function ParseAndDisplayJson(data) {
+    var div = document.getElementById('content');
+    var json = JSON.parse(data);
+    var nextPageIndex = json.data.after;
+    var count = json.data.dist;
+    var posts = json.data.children;
+
+    for (var i = 0; i < count; i++) {
+        if (posts[i].kind === LINK_PREFIX && posts[i].data.title.includes('Library')) {
+            var permalinkAnchor = document.createElement('a');
+            permalinkAnchor.innerHTML = posts[i].data.title;
+            permalinkAnchor.href = baseRedditUrl + posts[i].data.permalink;
+            permalinkAnchor.target = '_blank'; // force new tab on click
+
+            var chapterAnchor = document.createElement('a');
+            chapterAnchor.innerHTML = ' (Chapter)';
+            chapterAnchor.href = posts[i].data.url;
+            chapterAnchor.target = '_blank'; // force new tab on click
+
+            div.appendChild(permalinkAnchor);
+            div.appendChild(chapterAnchor);
+            div.appendChild(document.createElement('br'));
+        }
+    }
+
+    return nextPageIndex;
+}
+
+function hasNovelName(title) {
+
+}
+
 getRedditJson(frontPageUrl)
     .then(function (data) {
-        var div = document.getElementById('content');
-        var json = JSON.parse(data);
-        var nextPageIndex = json.data.after;
-        var count = json.data.dist;
-        var posts = json.data.children;
+        var count = 0;
+        var nextPageIndex = ParseAndDisplayJson(data);
 
-        for (var i = 0; i < count; i++) {
-            if (posts[i].kind === LINK_PREFIX && posts[i].data.title.includes('Library Of Heaven\'s Path')) {
-                var anchor = document.createElement('a');
-                anchor.innerHTML = posts[i].data.title;
-                anchor.href = baseRedditUrl + posts[i].data.permalink;
-                anchor.target = '_blank'; // force new tab on click
-                div.appendChild(anchor);
-                div.appendChild(document.createElement('br'));
-                //divInnerHTML += posts[i].data.url + '<br>';
-            }
-        }
+        // while (nextPageIndex != null || count < 5) {
+        //     (function (nextPage) {
+        //         getRedditJson(`${frontPageUrl}&after=${nextPage}`)
+        //             .then(function (data2) {
+        //                 count++;
+        //                 nextPageIndex = ParseAndDisplayJson(data2);
+        //             }, function (error) {
+        //                 console.error(error);
+        //             });
+        //     })(nextPageIndex);
+        // }
     }, function (error) {
         console.error(error);
     });
